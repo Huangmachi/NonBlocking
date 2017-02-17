@@ -26,17 +26,15 @@ from mininet.topo import Topo
 import logging
 import os
 
-logging.basicConfig(filename='./fattree.log', level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 
 class NonBlockingTopo(Topo):
-	logger.debug("Class NonBlockingTopo")
+	"""
+		Class of NonBlocking Topology.
+	"""
 	CoreSwitchList = []
 	HostList = []
 
 	def __init__(self, k):
-		logger.debug("Class NonBlockingTopo init")
 		self.pod = k
 		self.iCoreLayerSwitch = 1
 		self.iHost = k**3/4
@@ -44,12 +42,14 @@ class NonBlockingTopo(Topo):
 		# Init Topo
 		Topo.__init__(self)
 
-	def createTopo(self):
+	def createNodes(self):
 		self.createCoreLayerSwitch(self.iCoreLayerSwitch)
 		self.createHost(self.iHost)
 
-	# Create Switch and Host
 	def _addSwitch(self, number, level, switch_list):
+		"""
+			Create switches.
+		"""
 		for i in xrange(1, number+1):
 			PREFIX = str(level) + "00"
 			if i >= 10:
@@ -57,11 +57,12 @@ class NonBlockingTopo(Topo):
 			switch_list.append(self.addSwitch(PREFIX + str(i)))
 
 	def createCoreLayerSwitch(self, NUMBER):
-		logger.debug("Create Core Layer")
 		self._addSwitch(NUMBER, 1, self.CoreSwitchList)
 
 	def createHost(self, NUMBER):
-		logger.debug("Create Host")
+		"""
+			Create hosts.
+		"""
 		for i in xrange(1, NUMBER+1):
 			if i >= 100:
 				PREFIX = "h"
@@ -71,14 +72,18 @@ class NonBlockingTopo(Topo):
 				PREFIX = "h00"
 			self.HostList.append(self.addHost(PREFIX + str(i), cpu=1.0/NUMBER))
 
-	# Add Link
-	def createLink(self, bw_h2c=10):
-		logger.debug("Add link for Switch and Host.")
+	def createLinks(self, bw_h2c=10):
+		"""
+			Add links between switch and hosts.
+		"""
 		for sw in self.CoreSwitchList:
 			for host in self.HostList:
 				self.addLink(sw, host, bw=bw_h2c, max_queue_size=100, use_htb=True)   # use_htb=True
 
 	def set_ovs_protocol_13(self):
+		"""
+			Set the OpenFlow version for switches.
+		"""
 		self._set_ovs_protocol_13(self.CoreSwitchList)
 
 	def _set_ovs_protocol_13(self, sw_list):
@@ -101,11 +106,14 @@ def set_host_ip(net, topo):
 			i += 1
 
 def createTopo(pod, ip="192.168.56.101", port=6653, bw_h2c=10):
-	logging.debug("LV1 Create Fattree")
+	"""
+		Create network topology and run the Mininet.
+	"""
 	topo = NonBlockingTopo(pod)
-	topo.createTopo()
-	topo.createLink(bw_h2c=bw_h2c)
-	logging.debug("LV1 Start Mininet")
+	topo.createNodes()
+	topo.createLinks(bw_h2c=bw_h2c)
+
+	# Start Mininet
 	CONTROLLER_IP = ip
 	CONTROLLER_PORT = port
 	net = Mininet(topo=topo, link=TCLink, controller=None, autoSetMacs=True)
@@ -113,6 +121,7 @@ def createTopo(pod, ip="192.168.56.101", port=6653, bw_h2c=10):
 		'controller', controller=RemoteController,
 		ip=CONTROLLER_IP, port=CONTROLLER_PORT)
 	net.start()
+
 	# Set OVS's protocol as OF13.
 	topo.set_ovs_protocol_13()
 	# Set hosts IP addresses.
@@ -124,7 +133,7 @@ def createTopo(pod, ip="192.168.56.101", port=6653, bw_h2c=10):
 if __name__ == '__main__':
 	setLogLevel('info')
 	if os.getuid() != 0:
-		logger.debug("You are NOT root")
+		logging.debug("You are NOT root")
 	elif os.getuid() == 0:
 		# createTopo(4)
 		createTopo(8)
