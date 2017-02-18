@@ -78,7 +78,7 @@ class NonBlockingTopo(Topo):
 		"""
 		for sw in self.CoreSwitchList:
 			for host in self.HostList:
-				self.addLink(sw, host, bw=bw_h2c, max_queue_size=1000, use_htb=True)   # use_htb=True
+				self.addLink(sw, host, bw=bw_h2c, max_queue_size=1000)   # use_htb=False
 
 	def set_ovs_protocol_13(self):
 		"""
