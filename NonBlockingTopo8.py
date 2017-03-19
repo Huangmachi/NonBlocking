@@ -97,13 +97,24 @@ def set_host_ip(net, topo):
 	for k in xrange(len(topo.HostList)):
 		hostlist.append(net.get(topo.HostList[k]))
 	i = 1
-	j = 1
 	for host in hostlist:
-		host.setIP("10.%d.0.%d" % (i, j))
-		j += 1
-		if j == topo.pod/2 + 1:
-			j = 1
-			i += 1
+		host.setIP("10.0.0.%d" % i)
+		i += 1
+
+def install_proactive(net, topo):
+	"""
+		Install proactive flow entries for the switch.
+	"""
+	for sw in topo.CoreSwitchList:
+		for i in xrange(1, topo.iHost + 1):
+			cmd = "ovs-ofctl add-flow %s -O OpenFlow13 \
+				'table=0,idle_timeout=0,hard_timeout=0,priority=40,arp, \
+				nw_dst=10.0.0.%d,actions=output:%d'" % (sw, i, i)
+			os.system(cmd)
+			cmd = "ovs-ofctl add-flow %s -O OpenFlow13 \
+				'table=0,idle_timeout=0,hard_timeout=0,priority=40,ip, \
+				nw_dst=10.0.0.%d,actions=output:%d'" % (sw, i, i)
+			os.system(cmd)
 
 def createTopo(pod, ip="192.168.56.101", port=6653, bw_h2c=10):
 	"""
@@ -126,6 +137,8 @@ def createTopo(pod, ip="192.168.56.101", port=6653, bw_h2c=10):
 	topo.set_ovs_protocol_13()
 	# Set hosts IP addresses.
 	set_host_ip(net, topo)
+	# Install proactive flow entries.
+	install_proactive(net, topo)
 
 	CLI(net)
 	net.stop()

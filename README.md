@@ -14,11 +14,6 @@ Firstly, start up the network. An example is shown below:
 
     $ sudo python ryu/ryu/app/NonBlocking/NonBlockingTopo4.py
 
-And then, go into the top directory of Ryu, and run the application. An example is shown below:
-
-    $ cd ryu
-    $ ryu-manager --observe-links ryu/app/simple_switch_13.py
-
 If the network has started up, test the correctness of it:
 
     mininet> pingall
@@ -29,6 +24,6 @@ If the network has started up, test the correctness of it:
 
 Brought to you by Huang MaChi (Chongqing University of Posts and Telecommunications, Chongqing, China.) and Li Cheng (Beijing University of Posts and Telecommunications. www.muzixing.com).
 
-If you have any question, email me. Don't forget to STAR this repository!
+If you have any question, email me at huangmachi@foxmail.com. Don't forget to STAR this repository!
 
 Enjoy it!
